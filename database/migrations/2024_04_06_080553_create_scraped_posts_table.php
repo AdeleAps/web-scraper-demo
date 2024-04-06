@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('link')->unique();
+            $table->string('link');
             $table->integer('points');
+            $table->integer('origin_id')->unique();
+            $table->dateTime('origin_date');
             $table->timestamps();
             $table->softDeletes(); 
             $table->foreignId('deleted_by')->nullable()->references('id')->on('users')->nullOnDelete();

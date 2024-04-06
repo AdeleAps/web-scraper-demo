@@ -10,7 +10,7 @@ class Post extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['title', 'link', 'points', 'deleted_by'];
+    protected $fillable = ['title', 'link', 'points', 'deleted_by', 'origin_id', 'origin_date'];
 
     public function deletedBy()
     {
