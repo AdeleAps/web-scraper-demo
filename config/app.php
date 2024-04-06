@@ -123,7 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-        /* Debugging */
+    /* Debugging */
 
     'Debugbar' => Barryvdh\Debugbar\Facades\Debugbar::class,
 ];
