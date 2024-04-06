@@ -38,16 +38,16 @@ class scrape extends Command
     }
 
 
-    private function scrapeHackerNews(): void
+    private function scrapeHackerNews(int $pageNumber): int
     {
 
-        $url = 'https://news.ycombinator.com/';
+        $url = 'https://news.ycombinator.com/?p=' . $pageNumber;
         $htmlContent = @file_get_contents($url);
-        $existingOriginIds = Post::whereNull('deleted_at')->pluck('origin_id')->toArray();
+        $existingOriginIds = Post::pluck('origin_id')->toArray();
 
         if (!$htmlContent) {
             $this->displayError();
-            return;
+            return 0;
         }
 
         $dom = new \DOMDocument();
@@ -59,12 +59,16 @@ class scrape extends Command
 
         if (!$postsTable) {
             $this->displayError("No posts table found. You might be in the incorrect page.");
-            return;
+            return 0;
         }
 
         $xpath = new \DOMXPath($dom);
         $postPath = '//tr[@class="athing"]';
         $posts = $xpath->query($postPath);
+
+        if ($posts->length === 0) {
+            return 0;
+        }
 
         foreach ($posts as $post) {
             $originId = $post->getAttribute('id');
@@ -74,7 +78,7 @@ class scrape extends Command
 
             if (!$aElement) {
                 $this->displayError();
-                return;
+                return 0;
             }
 
             $title = $aElement->textContent;
@@ -87,16 +91,16 @@ class scrape extends Command
             $subline = $xpath->query($sublinePath, $post)->item(0);
 
             if (!$subline) {
-                $this->displayError("No subline found, check formatting.");
-                return;
+                $this->displayError("No subline found.");
+                return 0;
             }
 
             $scorePath = ".//span[@class='score']";
-            $scoreElement = $xpath->query($scorePath, $subline);
+            $scoreElement = $xpath->query($scorePath, $subline)->item(0);
             $points = 0;
 
             if ($scoreElement) {
-                $score = $scoreElement->item(0)->textContent;
+                $score = $scoreElement->textContent;
                 $points = $this->formatScore($score);
             }
 
@@ -115,11 +119,17 @@ class scrape extends Command
                     'origin_date' => $originDate,
                     'origin_id' => $originId,
                 ]);
+            } else {
+                $existingPost = Post::where('origin_id', $originId)->first();
+
+                if ($existingPost && !$existingPost->trashed()) {
+                    $existingPost->points = $points;
+                    $existingPost->save();
+                }
             }
         }
 
-        if ($posts->length === 0 || $posts->length < 30) {
-        }
+        return $posts->length;
     }
 
     /**
@@ -127,8 +137,17 @@ class scrape extends Command
      */
     public function handle()
     {
+        $currentPage = 1;
+        $postCount = 0;
+
         $this->info('Scraping has started. Please be patient.');
-        $this->scrapeHackerNews();
-        $this->info('Scraping complete!');
+
+        while (($postsScraped = $this->scrapeHackerNews($currentPage)) > 0) {
+            $postCount += $postsScraped;
+            $currentPage++;
+            $this->info("Posts scraped: $postCount");
+        }
+
+        $this->info("Scraping complete! $postCount posts were scraped.");
     }
 }
