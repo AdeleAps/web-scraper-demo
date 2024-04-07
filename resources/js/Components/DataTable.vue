@@ -3,6 +3,7 @@ import DataTable from "datatables.net-vue3";
 import DataTablesCore from "datatables.net";
 import "datatables.net-responsive";
 import { onMounted, ref } from "vue";
+import { router } from "@inertiajs/vue3";
 
 const props = defineProps({
     posts: Array,
@@ -12,8 +13,8 @@ const dataTableRef = ref(null);
 
 DataTable.use(DataTablesCore);
 
-const deleteMe = (param) => {
-    console.log(param);
+const deleteRow = (rowId) => {
+    router.delete(route("delete", rowId));
 };
 
 // This is clunky, but the DataTable disables Vue's events so I have to attach event listeners manually and leverage
@@ -24,7 +25,7 @@ onMounted(() => {
         const target = event.target;
         if (target.classList.contains("fa-trash")) {
             const rowId = target.getAttribute("data-row-id");
-            deleteMe(rowId);
+            deleteRow(rowId);
         }
     });
 });

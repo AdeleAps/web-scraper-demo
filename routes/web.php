@@ -10,6 +10,7 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::delete('/posts/{post}', [DashboardController::class, 'delete'])->name('delete');
 });
 
 Route::get('/', function () {
