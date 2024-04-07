@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('link');
             $table->integer('points');
-            $table->integer('origin_id')->unique();
+            $table->integer('origin_id');
             $table->dateTime('origin_date');
             $table->timestamps();
             $table->softDeletes(); 
