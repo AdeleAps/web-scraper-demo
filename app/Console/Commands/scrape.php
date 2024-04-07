@@ -38,12 +38,11 @@ class scrape extends Command
     }
 
 
-    private function scrapeHackerNews(int $pageNumber): int
+    private function scrapeHackerNews(int $pageNumber, array $originIds): int
     {
 
         $url = 'https://news.ycombinator.com/?p=' . $pageNumber;
         $htmlContent = @file_get_contents($url);
-        $existingOriginIds = Post::pluck('origin_id')->toArray();
 
         if (!$htmlContent) {
             $this->displayError();
@@ -111,7 +110,7 @@ class scrape extends Command
             $date = $dateElement->getAttribute('title');
             $originDate = new DateTime($date);
 
-            if (!in_array($originId, $existingOriginIds)) {
+            if (!in_array($originId, $originIds)) {
                 Post::create([
                     'title' => $title,
                     'link' => $link,
@@ -137,12 +136,13 @@ class scrape extends Command
      */
     public function handle()
     {
+        $existingOriginIds = Post::withTrashed()->pluck('origin_id')->toArray();
         $currentPage = 1;
         $postCount = 0;
 
         $this->info('Scraping has started. Please be patient.');
 
-        while (($postsScraped = $this->scrapeHackerNews($currentPage)) > 0) {
+        while (($postsScraped = $this->scrapeHackerNews($currentPage, $existingOriginIds)) > 0) {
             $postCount += $postsScraped;
             $currentPage++;
             $this->info("Posts scraped: $postCount");
