@@ -66,8 +66,7 @@ const options = {
                 :columns="columns"
                 :data="props.posts"
                 :options="options"
-            >
-            </DataTable>
+            />
         </div>
     </div>
 </template>

@@ -148,6 +148,6 @@ class scrape extends Command
             $this->info("Posts scraped: $postCount");
         }
 
-        $this->info("Scraping complete! $postCount posts were scraped.");
+        $this->info("Scraping complete! Please refresh the page. $postCount posts were scraped.");
     }
 }
