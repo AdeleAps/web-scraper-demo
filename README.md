@@ -21,7 +21,7 @@ DB_USERNAME=sail
 DB_PASSWORD=password
 ```
 
-CD into the project directory and run the following:
+CD into the project directory and run the following (make sure that Docker is running):
 
 ```
 composer install

@@ -37,7 +37,12 @@ const submit = () => {
             {{ status }}
         </div>
 
-        <Tooltip />
+        <Tooltip>
+            <template #content>
+                <div>Username - Codnity</div>
+                <div>Password: password</div>
+            </template>
+        </Tooltip>
 
         <form @submit.prevent="submit">
             <div>
